@@ -50,30 +50,6 @@ Obsession
 Shock
 Doubt""".splitlines()
 
-prompt = """You are assessing the cognitive empathy of a developing human. They have been shown a short video clip from a movie, and analyzed the emotional situation of a character.
-
-For the character, the human has provided between 2 and 8 emotions. For each emotion, the human will answer in the following format:
-
-EMOTION: <one word>
-OBSERVATIONS: <a few points of evidence which suggest the emotion>
-REASONING: <reasoning to explain why the observations and any context lead to the chosen emotion>
-
-You must go through each emotion and respond the following for each:
-
-EMOTION: <"fail" or "pass". You must check if it is in a list of valid emotions for this specific situation>
-JUSTIFICATION: <"fail" or "pass". You must check to see if the observations and reasoning logically lead to the emotion suggested>
-
-
-The list of valid emotions, where each emotion has some example justifications. The human may come up with another justification, but it must be sensible. The justifications below are almost comprehensive.
-Grief
-Unease
-Admiration
-Regret
-Apathy
-Desire
-Obsession
-Doubt"""
-
 
 # Match Characters
 
