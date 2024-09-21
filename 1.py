@@ -275,32 +275,60 @@ for line in adjusted_gemini_output:
     # check to see if emotion is valid to our analysis
     if emotion not in justs[person].keys():
         print("EMOTION NOT ON HUMAN LIST")
+        score -= 1
         continue
+        emotion_system_prompt = """Someone has watched a short clip from a film. They were tasked with analysing the emotions of characters in the clip. You are an expert psychologist who will assess their answers. You must check to see if the justification they provided for a given observed emotion is reasonable.
 
-    emotion_prompt = """Someone has watched a short clip from a film. They were tasked with analysing the emotions of characters in the clip. You are an expert psychologist who will assess their answers. You must check to see if the justification they provided for a givn observed emotion is reasonable.
+    Check very carefully to conclude whether or not the justification is reasonable. The emotion itself doesn't matter, as long as the justification is good enough to convince you that the emotion is valid in this case.
 
-I will provide you with a list of potential jusifications for the given emotion. It is likely that the justification provided by the test subject is similar to one on my list, but it may also be novel. In that case, check very carefully to conclude whether or not it is reasonable.
+    You response must only contain 'ANSWER: pass' or 'ANSWER: fail' to reflect your decision.
+    """
 
-You response must only contain 'ANSWER: pass' or 'ANSWER: fail' to reflect your decision.
-"""
+        emotion_user_prompt = f"emotion:{emotion}\njustification: {explanation}"
 
-# Justify your answer carefully, then say "ANSWER: pass" or "ANSWER: fail" only on the final line of your response to reflect your decision.
+    else:
+        score += 1
+        emotion_system_prompt = """Someone has watched a short clip from a film. They were tasked with analysing the emotions of characters in the clip. You are an expert psychologist who will assess their answers. You must check to see if the justification they provided for a given observed emotion is expected.
+
+    I will provide you with a list of the best jusifications for the given emotion. You must check to see if the human test subject's justification is extremely similar to ours, and follows the same line of logic. If not, they have failed.
+
+    You response must only contain 'ANSWER: pass' or 'ANSWER: fail' to reflect your decision.
+    """
+
+        emotion_user_prompt = f"emotion: {emotion}\nexample justifications: {justs[person][emotion]}\nHuman Test Subject's justification: {explanation}"
+
+    # I will provide you with a list of potential jusifications for the given emotion. It is likely that the justification provided by the test subject is similar to one on my list, but it may also be novel. In that case, check very carefully to conclude whether or not it is reasonable.
+    # Justify your answer carefully, then say "ANSWER: pass" or "ANSWER: fail" only on the final line of your response to reflect your decision.
 
     stream = client.chat.completions.create(
         model="gpt-4o",
-        messages=[{"role": "system", "content": emotion_prompt}, {"role": "user", "content": f"example justifications: {justs[person][emotion]}\nHuman Test Subject's justification: {explanation}"}],
+        messages=[{"role": "system", "content": emotion_system_prompt}, {"role": "user", "content": emotion_user_prompt}],
         stream=True,
     )
 
 
+    response = ""
     for chunk in stream:
         if chunk.choices[0].delta.content is not None:
             print(chunk.choices[0].delta.content, end="")
+            response += chunk.choices[0].delta.content
 
     print()
 
+    if "pass" in response:
+        score += 1
+    # else:
+    #     score -= 0.5
 
-    
+
+
+print(score)
+score += 10
+score = max(0, score)
+score = min(20, score)
+score /= 4
+score = round(score, 2)
+print(score) 
 
 
 
